@@ -1,3 +1,7 @@
 .gradle/
 .idea/
 out/
+Californium.properties
+Proxy.properties
+ProxyMapping.properties
+build/
