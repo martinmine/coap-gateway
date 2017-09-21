@@ -19,13 +19,11 @@ import java.io.IOException;
 
 import org.eclipse.californium.core.CoapResource;
 import org.eclipse.californium.core.CoapServer;
-import org.eclipse.californium.core.network.config.NetworkConfig;
 import org.eclipse.californium.core.server.resources.CoapExchange;
 
 import org.eclipse.californium.proxy.DirectProxyCoapResolver;
 import org.eclipse.californium.proxy.ProxyHttpServer;
 import org.eclipse.californium.proxy.resources.ForwardingResource;
-import org.eclipse.californium.proxy.resources.ProxyCoapClientResource;
 import org.eclipse.californium.proxy.resources.ProxyHttpClientResource;
 
 /**
@@ -42,24 +40,20 @@ import org.eclipse.californium.proxy.resources.ProxyHttpClientResource;
  */
 public class ExampleCrossProxy {
 
-    private static final int PORT = NetworkConfig.getStandard().getInt(NetworkConfig.Keys.COAP_PORT);
-
     private CoapServer targetServerA;
 
-    public ExampleCrossProxy() throws IOException {
+    public ExampleCrossProxy(final int coapPort, final int httpPort) throws IOException {
         CustomProxyCoapClientResource coap2coap = new CustomProxyCoapClientResource("coap2coap");
         ForwardingResource coap2http = new ProxyHttpClientResource("coap2http");
 
-        System.out.println("Preparing listening for CoAP on port " + PORT);
-
         // Create CoAP Server on PORT with proxy resources form CoAP to CoAP and HTTP
-        targetServerA = new CoapServer(PORT);
+        targetServerA = new CoapServer(coapPort);
         targetServerA.add(coap2coap);
         targetServerA.add(coap2http);
         targetServerA.add(new TargetResource("target"));
         targetServerA.start();
 
-        ProxyHttpServer httpServer = new ProxyHttpServer(8084);
+        ProxyHttpServer httpServer = new ProxyHttpServer(httpPort);
         httpServer.setProxyCoapResolver(new DirectProxyCoapResolver(coap2coap));
 
         System.out.println("CoAP resource \"target\" available over HTTP at: http://localhost:8080/proxy/coap://localhost:PORT/target");
@@ -81,9 +75,5 @@ public class ExampleCrossProxy {
         public void handleGET(CoapExchange exchange) {
             exchange.respond("Response "+(++counter)+" from resource " + getName());
         }
-    }
-
-    public static void main(String[] args) throws Exception {
-        new ExampleCrossProxy();
     }
 }
