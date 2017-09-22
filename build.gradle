@@ -19,5 +19,7 @@ dependencies {
     // https://mvnrepository.com/artifact/org.eclipse.californium/californium-core
     compile group: 'org.eclipse.californium', name: 'californium-core', version: '1.0.6'
 
+    // https://mvnrepository.com/artifact/commons-cli/commons-cli
+    compile group: 'commons-cli', name: 'commons-cli', version: '1.4'
 }
 
