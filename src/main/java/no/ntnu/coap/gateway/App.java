@@ -1,11 +1,12 @@
 package no.ntnu.coap.gateway;
 
+import no.ntnu.coap.gateway.proxy.resources.ProxyCoapClientResource;
 import org.apache.commons.cli.*;
 import org.eclipse.californium.core.CoapServer;
-import org.eclipse.californium.proxy.DirectProxyCoapResolver;
-import org.eclipse.californium.proxy.ProxyHttpServer;
-import org.eclipse.californium.proxy.resources.ForwardingResource;
-import org.eclipse.californium.proxy.resources.ProxyHttpClientResource;
+import no.ntnu.coap.gateway.proxy.DirectProxyCoapResolver;
+import no.ntnu.coap.gateway.proxy.ProxyHttpServer;
+import no.ntnu.coap.gateway.proxy.resources.ForwardingResource;
+import no.ntnu.coap.gateway.proxy.resources.ProxyHttpClientResource;
 
 import java.io.IOException;
 
@@ -29,7 +30,7 @@ public class App {
             return;
         }
 
-        final CustomProxyCoapClientResource coap2coap = new CustomProxyCoapClientResource("coap2coap");
+        final ProxyCoapClientResource coap2coap = new ProxyCoapClientResource("coap2coap");
 
         if (mode.equals("http")) {
             System.out.println("Starting HTTP gateway on port " + httpPort);
