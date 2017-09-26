@@ -59,6 +59,7 @@ public class CustomMediaTypeRegistry {
     public static final int APPLICATION_CBOR = 60;
 
     public static final int APPLICATION_X_JAVASCRIPT = 52;
+    public static final int APPLICATION_X_URL_ENCODED = 53;
     public static final int TEXT_CSS = 4;
 
     // implementation specific
@@ -95,6 +96,7 @@ public class CustomMediaTypeRegistry {
 
         add(APPLICATION_X_JAVASCRIPT, "application/x-javascript", "js");
         add(TEXT_CSS, "text/css", "css");
+        add(APPLICATION_X_URL_ENCODED, "application/x-www-form-urlencoded", "urlform");
     }
 
     // Static Functions ////////////////////////////////////////////////////////

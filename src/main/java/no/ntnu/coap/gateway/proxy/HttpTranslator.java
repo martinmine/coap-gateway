@@ -170,6 +170,7 @@ public final class HttpTranslator {
 		// if not recognized, the content-type should be
 		// application/octet-stream (draft-castellani-core-http-mapping 6.2)
 		if (coapContentType == CustomMediaTypeRegistry.UNDEFINED) {
+			LOGGER.warning("Unknown content type, falling back to octet-stream");
 			coapContentType = CustomMediaTypeRegistry.APPLICATION_OCTET_STREAM;
 		}
 
@@ -631,6 +632,7 @@ public final class HttpTranslator {
 			// if the content type is not set, translate with octect-stream
 			if (! coapMessage.getOptions().hasContentFormat()) {
 				contentType = ContentType.APPLICATION_OCTET_STREAM;
+				LOGGER.warning("No content type has been set, using octet-stream instead");
 			} else {
 				int coapContentType = coapMessage.getOptions().getContentFormat();
 				// search for the media type inside the property file
@@ -652,7 +654,7 @@ public final class HttpTranslator {
 				try {
 					contentType = ContentType.parse(coapContentTypeString);
 				} catch (UnsupportedCharsetException e) {
-					LOGGER.finer("Cannot convert string to ContentType: " + e.getMessage());
+					LOGGER.warning("Cannot convert string to ContentType: " + e.getMessage());
 					contentType = ContentType.APPLICATION_OCTET_STREAM;
 				}
 			}
@@ -802,6 +804,7 @@ public final class HttpTranslator {
 			String proxyUriString = URLDecoder.decode(
 					coapRequest.getOptions().getProxyUri(), "UTF-8");
 			proxyUri = new URI(proxyUriString);
+			LOGGER.info("Received incoming proxy request to " + proxyUriString);
 		} catch (UnsupportedEncodingException e) {
 			LOGGER.warning("UTF-8 do not support this encoding: " + e);
 			throw new TranslationException("UTF-8 do not support this encoding", e);

@@ -103,6 +103,7 @@ public final class CoapTranslator {
 			if (proxyEndpointPos > 0) {
 				proxyUriForward = proxyUriString.substring(proxyEndpointPos + proxyEndpoint.length());
 				proxyUriString = proxyUriString.substring(0, proxyEndpointPos + proxyEndpoint.length());
+				LOGGER.info("Will forward to " + proxyUriForward);
 			}
 			serverUri = new URI(proxyUriString);
 		} catch (UnsupportedEncodingException e) {

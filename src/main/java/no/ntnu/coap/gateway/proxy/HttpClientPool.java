@@ -42,13 +42,14 @@ public class HttpClientPool {
     }
 
     public static AbstractHttpClient getClient() {
-        synchronized (clients) {
+     /*   synchronized (clients) {
             if (clients.size() > 0) {
                 return clients.remove();
             }
         }
 
         LOGGER.warning("Out of clients, creating more");
+        */
         return createClient();
     }
 
