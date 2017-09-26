@@ -22,6 +22,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URL;
 import java.util.logging.Logger;
 
 import org.eclipse.californium.core.coap.OptionNumberRegistry;
@@ -39,75 +40,24 @@ public class MappingProperties extends java.util.Properties {
 	 */
 	private static final long serialVersionUID = 4126898261482584755L;
 
-	/** The header for Californium property files. */
-	private static final String HEADER = "Californium Cross-Proxy mapping properties file";
-
-	/** The name of the default properties file. */
-	private static final String DEFAULT_FILENAME = "ProxyMapping.properties";
-
-	// default properties used by the library
-	public static final MappingProperties std = new MappingProperties(DEFAULT_FILENAME);
-	
 	// Constructors ////////////////////////////////////////////////////////////
 	
 	public MappingProperties(String fileName) {
 		init();
 		initUserDefined(fileName);
 	}
-	
-	public Double getDbl(String key) {
-		String value = getProperty(key);
-		if (value != null) {
-			try {
-				return Double.parseDouble(value);
-			} catch (NumberFormatException e) {
-				LOG.severe(String.format("Invalid double property: %s=%s", key, value));
-			}
-		} else {
-			LOG.severe(String.format("Undefined double property: %s", key));
-		}
-		return 0.0;
-	}
 
-	public int getInt(String key) {
-		String value = getProperty(key);
-		if (value != null) {
-			try {
-				return Integer.parseInt(value.trim());
-			} catch (NumberFormatException e) {
-				LOG.severe(String.format("Invalid integer property: %s=%s", key, value));
-			}
-		} else {
-			LOG.severe(String.format("Undefined integer property: %s", key));
+	private void load(String fileName) throws IOException {
+		ClassLoader classLoader = getClass().getClassLoader();
+		URL resourceUrl = classLoader.getResource(fileName);
+		if (resourceUrl == null) {
+			System.err.println("Unable to load resource " + fileName);
+			System.exit(1);
+			return;
 		}
-		return 0;
-	}
-
-	public String getStr(String key) {
-		String value = getProperty(key);
-		if (value == null) {
-			LOG.severe(String.format("Undefined string property: %s", key));
+		try (InputStream is = resourceUrl.openStream()) {
+			load(is);
 		}
-		return value;
-	}
-
-	public boolean getBool(String key) {
-		String value = getProperty(key);
-		if (value != null) {
-			try {
-				return Boolean.parseBoolean(value);
-			} catch (NumberFormatException e) {
-				LOG.severe(String.format("Invalid boolean property: %s=%s", key, value));
-			}
-		} else {
-			LOG.severe(String.format("Undefined boolean property: %s", key));
-		}
-		return false;
-	}
-	
-	public void load(String fileName) throws IOException {
-		InputStream in = new FileInputStream(fileName);
-		load(in);
 	}
 
 	public void set(String key, double value) {
@@ -124,11 +74,6 @@ public class MappingProperties extends java.util.Properties {
 	
 	public void set(String key, boolean value) {
 		setProperty(key, String.valueOf(value));
-	}
-
-	public void store(String fileName) throws IOException {
-		OutputStream out = new FileOutputStream(fileName);
-		store(out, HEADER);
 	}
 
 	private void init() {
@@ -269,12 +214,9 @@ public class MappingProperties extends java.util.Properties {
 			load(fileName);
 		} catch (IOException e) {
 			// file does not exist:
-			// write default properties
-			try {
-				store(fileName);
-			} catch (IOException e1) {
-				LOG.warning(String.format("Failed to create configuration file: %s", e1.getMessage()));
-			}
+			// die
+			System.err.println(e.toString());
+			System.exit(1);
 		}
 	}
 }

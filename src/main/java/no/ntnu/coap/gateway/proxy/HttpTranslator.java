@@ -67,8 +67,6 @@ import org.eclipse.californium.core.coap.CoAP.ResponseCode;
 import org.eclipse.californium.core.coap.CoAP.Type;
 import org.eclipse.californium.core.coap.Message;
 import org.eclipse.californium.core.coap.Option;
-import org.eclipse.californium.core.coap.OptionNumberRegistry;
-import org.eclipse.californium.core.coap.OptionNumberRegistry.optionFormats;
 import org.eclipse.californium.core.coap.Request;
 import org.eclipse.californium.core.coap.Response;
 
@@ -206,19 +204,28 @@ public final class HttpTranslator {
 				// FIXME: CoAP does no longer support multiple accept-options.
 				// If an HTTP request contains multiple accepts, this method
 				// fails. Therefore, we currently skip accepts at the moment.
-				if (headerName.startsWith("accept"))
-						continue;
+				if (headerName.startsWith("accept")){
+					LOGGER.warning("Ignoring accept header");
+					continue;
+				}
+
 	
 				// get the mapping from the property file
 				String optionCodeString = HTTP_TRANSLATION_PROPERTIES.getProperty(KEY_HTTP_HEADER + headerName);
 	
 				// ignore the header if not found in the properties file
 				if (optionCodeString == null || optionCodeString.isEmpty()) {
+					LOGGER.warning("No header found for header name [" + headerName + "] -> [" + KEY_HTTP_HEADER + headerName +"] entr: " + HTTP_TRANSLATION_PROPERTIES.size());
+
+					if (headerName.equals("set-cookie")) {
+						LOGGER.warning("is set-cookie");
+
+					}
 					continue;
 				}
 	
 				// get the option number
-				int optionNumber = OptionNumberRegistry.RESERVED_0;
+				int optionNumber = CustomOptionNumberRegistry.RESERVED_0;
 				try {
 					optionNumber = Integer.parseInt(optionCodeString.trim());
 				} catch (Exception e) {
@@ -229,7 +236,8 @@ public final class HttpTranslator {
 	
 				// ignore the content-type because it will be handled within the
 				// payload
-				if (optionNumber == OptionNumberRegistry.CONTENT_FORMAT) {
+				if (optionNumber == CustomOptionNumberRegistry.CONTENT_FORMAT) {
+					LOGGER.info("Content format skipping header " + headerName);
 					continue;
 				}
 	
@@ -238,7 +246,7 @@ public final class HttpTranslator {
 	
 				// if the option is accept, it needs to translate the
 				// values
-				if (optionNumber == OptionNumberRegistry.ACCEPT) {
+				if (optionNumber == CustomOptionNumberRegistry.ACCEPT) {
 					// remove the part where the client express the weight of each
 					// choice
 					headerValue = headerValue.trim().split(";")[0].trim();
@@ -263,7 +271,7 @@ public final class HttpTranslator {
 							}
 						}
 					}
-				} else if (optionNumber == OptionNumberRegistry.MAX_AGE) {
+				} else if (optionNumber == CustomOptionNumberRegistry.MAX_AGE) {
 					int maxAge = 0;
 					if (!headerValue.contains("no-cache")) {
 						headerValue = headerValue.split(",")[0];
@@ -284,8 +292,9 @@ public final class HttpTranslator {
 				} else {
 					// create the option
 					Option option = new Option(optionNumber);
-					switch (OptionNumberRegistry.getFormatByNr(optionNumber)) {
+					switch (CustomOptionNumberRegistry.getFormatByNr(optionNumber)) {
 					case INTEGER:
+
 						option.setIntegerValue(Integer.parseInt(headerValue));
 						break;
 					case OPAQUE:
@@ -296,6 +305,7 @@ public final class HttpTranslator {
 						option.setStringValue(headerValue);
 						break;
 					}
+					LOGGER.info("Header " + headerName + " mapped to " + optionNumber + " with value " + headerValue);
 					// option.setValue(headerValue.getBytes(Charset.forName("ISO-8859-1")));
 					optionList.add(option);
 				}
@@ -306,7 +316,7 @@ public final class HttpTranslator {
 				// Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
 				// This cannot be parsed into a single CoAP Option and yields a
 				// NumberFormatException
-				LOGGER.warning("Could not parse header line "+header);
+				LOGGER.warning("Could not parse header line " + header);
 			}
 		} // while (headerIterator.hasNext())
 
@@ -574,7 +584,7 @@ public final class HttpTranslator {
 			// The Max-Age Option for responses to POST, PUT or DELETE requests
 			// should always be set to 0 (draft-castellani-core-http-mapping).
 			if (coapMethod == Code.GET) {
-				coapResponse.getOptions().setMaxAge(OptionNumberRegistry.Defaults.MAX_AGE);
+				coapResponse.getOptions().setMaxAge(CustomOptionNumberRegistry.Defaults.MAX_AGE);
 			} else {
 				coapResponse.getOptions().setMaxAge(0);
 			}
@@ -729,7 +739,7 @@ public final class HttpTranslator {
 			// the payload; skip proxy-uri because it has to be translated in a
 			// different way
 			int optionNumber = option.getNumber();
-			if (optionNumber != OptionNumberRegistry.CONTENT_FORMAT && optionNumber != OptionNumberRegistry.PROXY_URI) {
+			if (optionNumber != CustomOptionNumberRegistry.CONTENT_FORMAT && optionNumber != CustomOptionNumberRegistry.PROXY_URI) {
 				// get the mapping from the property file
 				String headerName = HTTP_TRANSLATION_PROPERTIES.getProperty(KEY_COAP_OPTION + optionNumber);
 
@@ -737,25 +747,29 @@ public final class HttpTranslator {
 				if (headerName != null && !headerName.isEmpty()) {
 					// format the value
 					String stringOptionValue = null;
-					if (OptionNumberRegistry.getFormatByNr(optionNumber) == optionFormats.STRING) {
+					if (CustomOptionNumberRegistry.getFormatByNr(optionNumber) == CustomOptionNumberRegistry.optionFormats.STRING) {
 						stringOptionValue = option.getStringValue();
-					} else if (OptionNumberRegistry.getFormatByNr(optionNumber) == optionFormats.INTEGER) {
+					} else if (CustomOptionNumberRegistry.getFormatByNr(optionNumber) == CustomOptionNumberRegistry.optionFormats.INTEGER) {
 						stringOptionValue = Integer.toString(option.getIntegerValue());
-					} else if (OptionNumberRegistry.getFormatByNr(optionNumber) == optionFormats.OPAQUE) {
+					} else if (CustomOptionNumberRegistry.getFormatByNr(optionNumber) == CustomOptionNumberRegistry.optionFormats.OPAQUE) {
 						stringOptionValue = new String(option.getValue());
 					} else {
 						// if the option is not formattable, skip it
+						LOGGER.warning("Option " + optionNumber + " is not formattable");
 						continue;
 					}
 
 					// custom handling for max-age
 					// format: cache-control: max-age=60
-					if (optionNumber == OptionNumberRegistry.MAX_AGE) {
+					if (optionNumber == CustomOptionNumberRegistry.MAX_AGE) {
 						stringOptionValue = "max-age=" + stringOptionValue;
 					}
 
+					LOGGER.info("Option " + optionNumber + " maps to header " + headerName + " with value " + stringOptionValue);
 					Header header = new BasicHeader(headerName, stringOptionValue);
 					headers.add(header);
+				} else {
+					LOGGER.warning("No header for option number " + optionNumber);
 				}
 			}
 		}
@@ -899,7 +913,7 @@ public final class HttpTranslator {
 
 		// set max-age if not already set
 		if (!httpResponse.containsHeader("cache-control")) {
-			httpResponse.setHeader("cache-control", "max-age=" + Long.toString(OptionNumberRegistry.Defaults.MAX_AGE));
+			httpResponse.setHeader("cache-control", "max-age=" + Long.toString(CustomOptionNumberRegistry.Defaults.MAX_AGE));
 		}
 
 		// get the http entity if the request was not HEAD
