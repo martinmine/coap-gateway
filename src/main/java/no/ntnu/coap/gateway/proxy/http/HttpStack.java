@@ -123,14 +123,15 @@ public class HttpStack {
 
     void start(final boolean isDaemon) {
         // Listen of the given port
-        LOGGER.info("HttpStack listening on port " + httpPort);
         ioReactor.listen(new InetSocketAddress(httpPort));
+        LOGGER.info("HttpStack listening on port " + httpPort);
 
         if (isDaemon) {
             // create the listener thread
             Thread listener = new Thread("HttpStack listener") {
                 @Override
                 public void run() {
+                    LOGGER.info("Submitted http listening to thread 'HttpStack listener'");
                     acceptConnections();
                 }
             };
@@ -149,8 +150,7 @@ public class HttpStack {
         // Starts the reactor and initiates the dispatch of I/O
         // event notifications to the given IOEventDispatch.
         try {
-            LOGGER.info("Submitted http listening to thread 'HttpStack listener'");
-
+            LOGGER.info("Waiting for incoming requests");
             ioReactor.execute(ioEventDispatch);
         } catch (IOException e) {
             LOGGER.severe("I/O Exception in HttpStack: " + e.getMessage());
