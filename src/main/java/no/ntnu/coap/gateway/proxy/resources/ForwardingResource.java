@@ -22,6 +22,9 @@ import org.eclipse.californium.core.coap.Request;
 import org.eclipse.californium.core.coap.Response;
 import org.eclipse.californium.core.network.Exchange;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.logging.Logger;
+
 
 public abstract class ForwardingResource extends CoapResource {
 
@@ -36,9 +39,8 @@ public abstract class ForwardingResource extends CoapResource {
     @Override
     public void handleRequest(Exchange exchange) {
         exchange.sendAccept();
-        Response response = forwardRequest(exchange.getRequest());
-        exchange.sendResponse(response);
+        forwardRequest(exchange.getRequest()).thenAccept(exchange::sendResponse);
     }
 
-    public abstract Response forwardRequest(Request request);
+    public abstract CompletableFuture<Response> forwardRequest(Request request);
 }

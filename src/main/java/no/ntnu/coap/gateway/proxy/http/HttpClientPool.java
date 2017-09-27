@@ -3,18 +3,19 @@ package no.ntnu.coap.gateway.proxy.http;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.protocol.RequestAcceptEncoding;
 import org.apache.http.client.protocol.ResponseContentEncoding;
-import org.apache.http.impl.client.AbstractHttpClient;
 import org.apache.http.impl.client.DefaultConnectionKeepAliveStrategy;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
+import org.apache.http.impl.nio.client.HttpAsyncClients;
 import org.apache.http.protocol.*;
 
+import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.logging.Logger;
 
 public class HttpClientPool {
     private static final int INIT_SIZE = 2;
-    private static final Queue<AbstractHttpClient> clients = initClientPool(INIT_SIZE);
+    private static final Queue<CloseableHttpAsyncClient> clients = initClientPool(INIT_SIZE);
 
     private static final int KEEP_ALIVE = 5000;
 
@@ -31,8 +32,8 @@ public class HttpClientPool {
     private HttpClientPool() {
     }
 
-    private static Queue<AbstractHttpClient> initClientPool(final int size) {
-        final Queue<AbstractHttpClient> clients = new ArrayDeque<>(size);
+    private static Queue<CloseableHttpAsyncClient> initClientPool(final int size) {
+        final Queue<CloseableHttpAsyncClient> clients = new ArrayDeque<>(size);
 
         for (int i = 0; i < size; i++) {
             clients.add(createClient());
@@ -41,7 +42,7 @@ public class HttpClientPool {
         return clients;
     }
 
-    public static AbstractHttpClient getClient() {
+    public static CloseableHttpAsyncClient getClient() {
         synchronized (clients) {
             if (clients.size() > 0) {
                 return clients.remove();
@@ -53,41 +54,43 @@ public class HttpClientPool {
         return createClient();
     }
 
-    public static AbstractHttpClient createClient() {
-        final AbstractHttpClient client = new DefaultHttpClient();
+    public static CloseableHttpAsyncClient createClient() {
+        return HttpAsyncClients.custom()
+                .addInterceptorFirst(new RequestAcceptEncoding())
+                .addInterceptorFirst(new RequestConnControl())
+                // .addInterceptorFirst(new RequestContent())
+                .addInterceptorFirst(new RequestDate())
+                .addInterceptorFirst(new RequestExpectContinue())
+                .addInterceptorFirst(new RequestTargetHost())
+                .addInterceptorFirst(new RequestUserAgent())
+                .addInterceptorFirst(new ResponseContentEncoding())
+                .setKeepAliveStrategy(new DefaultConnectionKeepAliveStrategy() {
+                    @Override
+                    public long getKeepAliveDuration(HttpResponse response, HttpContext context) {
+                        long keepAlive = super.getKeepAliveDuration(response, context);
+                        if (keepAlive == -1) {
+                            // Keep connections alive if a keep-alive value
+                            // has not be explicitly set by the server
+                            keepAlive = KEEP_ALIVE;
+                        }
+                        return keepAlive;
+                    }
 
-        // request interceptors
-        client.addRequestInterceptor(new RequestAcceptEncoding());
-        client.addRequestInterceptor(new RequestConnControl());
-        // HTTP_CLIENT.addRequestInterceptor(new RequestContent());
-        client.addRequestInterceptor(new RequestDate());
-        client.addRequestInterceptor(new RequestExpectContinue());
-        client.addRequestInterceptor(new RequestTargetHost());
-        client.addRequestInterceptor(new RequestUserAgent());
-
-        // response intercptors
-        client.addResponseInterceptor(new ResponseContentEncoding());
-
-        client.setKeepAliveStrategy(new DefaultConnectionKeepAliveStrategy() {
-            @Override
-            public long getKeepAliveDuration(HttpResponse response, HttpContext context) {
-                long keepAlive = super.getKeepAliveDuration(response, context);
-                if (keepAlive == -1) {
-                    // Keep connections alive if a keep-alive value
-                    // has not be explicitly set by the server
-                    keepAlive = KEEP_ALIVE;
-                }
-                return keepAlive;
-            }
-
-        });
-
-        return client;
+                })
+                .build();
     }
 
-    public static void putClient(final AbstractHttpClient client) {
+    public static void putClient(final CloseableHttpAsyncClient client) {
         synchronized (clients) {
-            clients.add(client);
+            if (clients.size() > INIT_SIZE) {
+                try {
+                    client.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                clients.add(client);
+            }
         }
     }
 }
