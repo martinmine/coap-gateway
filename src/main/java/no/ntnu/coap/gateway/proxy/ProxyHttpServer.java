@@ -41,7 +41,7 @@ import no.ntnu.coap.gateway.proxy.resources.StatsResource;
  * proxy. A URI of an HTTP request might look like this:
  * http://localhost:8080/proxy/coap://localhost:5683/example
  */
-public class ProxyHttpServer {
+public class ProxyHttpServer implements RequestHandler {
 
 	private final static Logger LOGGER = Logger.getLogger(ProxyHttpServer.class.getCanonicalName());
 	
@@ -75,9 +75,10 @@ public class ProxyHttpServer {
 	public ProxyHttpServer(int httpPort) throws IOException {
 	
 		this.httpStack = new HttpStack(httpPort);
-		this.httpStack.setRequestHandler(ProxyHttpServer.this::handleRequest);
+		this.httpStack.setRequestHandler(this);
 	}
 
+	@Override
 	public void handleRequest(final Request request, final RequestContext context) {
 		
 		LOGGER.info("ProxyEndpoint handles request "+request);
