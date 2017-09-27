@@ -24,7 +24,7 @@ public class HttpClientPool {
      * DefaultHttpClient is thread safe. It is recommended that the same
      * instance of this class is reused for multiple request executions.
      * NO IT IS NOT RECOMMENDED TO DO SO:
-     *      https://hc.apache.org/httpcomponents-client-ga/tutorial/html/connmgmt.html#d5e619
+     * https://hc.apache.org/httpcomponents-client-ga/tutorial/html/connmgmt.html#d5e619
      */
 
 

@@ -25,69 +25,70 @@ package no.ntnu.coap.gateway.proxy;
  * RFC 7252, Section 12.2 and other CoAP extensions.
  */
 public final class CustomOptionNumberRegistry {
-    public static final int UNKNOWN			= -1;
+    public static final int UNKNOWN = -1;
 
     // RFC 7252
-    public static final int RESERVED_0		= 0;
-    public static final int IF_MATCH		= 1;
-    public static final int URI_HOST		= 3;
-    public static final int ETAG			= 4;
-    public static final int IF_NONE_MATCH	= 5;
-    public static final int URI_PORT		= 7;
-    public static final int LOCATION_PATH	= 8;
-    public static final int URI_PATH		= 11;
-    public static final int CONTENT_FORMAT	= 12;
-    public static final int MAX_AGE			= 14;
-    public static final int URI_QUERY		= 15;
-    public static final int ACCEPT			= 17;
-    public static final int LOCATION_QUERY	= 20;
-    public static final int PROXY_URI		= 35;
-    public static final int PROXY_SCHEME	= 39;
-    public static final int SIZE1			= 60;
-    public static final int RESERVED_1		= 128;
-    public static final int RESERVED_2		= 132;
-    public static final int RESERVED_3		= 136;
-    public static final int RESERVED_4		= 140;
+    public static final int RESERVED_0 = 0;
+    public static final int IF_MATCH = 1;
+    public static final int URI_HOST = 3;
+    public static final int ETAG = 4;
+    public static final int IF_NONE_MATCH = 5;
+    public static final int URI_PORT = 7;
+    public static final int LOCATION_PATH = 8;
+    public static final int URI_PATH = 11;
+    public static final int CONTENT_FORMAT = 12;
+    public static final int MAX_AGE = 14;
+    public static final int URI_QUERY = 15;
+    public static final int ACCEPT = 17;
+    public static final int LOCATION_QUERY = 20;
+    public static final int PROXY_URI = 35;
+    public static final int PROXY_SCHEME = 39;
+    public static final int SIZE1 = 60;
+    public static final int RESERVED_1 = 128;
+    public static final int RESERVED_2 = 132;
+    public static final int RESERVED_3 = 136;
+    public static final int RESERVED_4 = 140;
 
     // draft-ietf-core-observe-14
-    public static final int OBSERVE			= 6;
+    public static final int OBSERVE = 6;
 
     // draft-ietf-core-block-14
-    public static final int BLOCK2			= 23;
-    public static final int BLOCK1			= 27;
-    public static final int SIZE2			= 28;
+    public static final int BLOCK2 = 23;
+    public static final int BLOCK1 = 27;
+    public static final int SIZE2 = 28;
 
-    public static final int COOKIE          = 21;
-    public static final int SET_COOKIE      = 22;
+    public static final int COOKIE = 21;
+    public static final int SET_COOKIE = 22;
+
     /**
      * Option names.
      */
     public static class Names {
-        public static final String Reserved 		= "Reserved";
+        public static final String Reserved = "Reserved";
 
-        public static final String If_Match 		= "If-Match";
-        public static final String Uri_Host 		= "Uri-Host";
-        public static final String ETag 			= "ETag";
-        public static final String If_None_Match 	= "If-None-Match";
-        public static final String Uri_Port 		= "Uri-Port";
-        public static final String Location_Path 	= "Location-Path";
-        public static final String Uri_Path 		= "Uri-Path";
-        public static final String Content_Format	= "Content-Format";
-        public static final String Max_Age 			= "Max-Age";
-        public static final String Uri_Query 		= "Uri-Query";
-        public static final String Accept 			= "Accept";
-        public static final String Location_Query 	= "Location-Query";
-        public static final String Proxy_Uri 		= "Proxy-Uri";
-        public static final String Proxy_Scheme		= "Proxy-Scheme";
-        public static final String Size1			= "Size1";
+        public static final String If_Match = "If-Match";
+        public static final String Uri_Host = "Uri-Host";
+        public static final String ETag = "ETag";
+        public static final String If_None_Match = "If-None-Match";
+        public static final String Uri_Port = "Uri-Port";
+        public static final String Location_Path = "Location-Path";
+        public static final String Uri_Path = "Uri-Path";
+        public static final String Content_Format = "Content-Format";
+        public static final String Max_Age = "Max-Age";
+        public static final String Uri_Query = "Uri-Query";
+        public static final String Accept = "Accept";
+        public static final String Location_Query = "Location-Query";
+        public static final String Proxy_Uri = "Proxy-Uri";
+        public static final String Proxy_Scheme = "Proxy-Scheme";
+        public static final String Size1 = "Size1";
 
-        public static final String Observe			= "Observe";
+        public static final String Observe = "Observe";
 
-        public static final String Block2			= "Block2";
-        public static final String Block1			= "Block1";
-        public static final String Size2			= "Size2";
-        public static final String Cookie           = "Cookie";
-        public static final String Set_Cookie       = "Set-Cookie";
+        public static final String Block2 = "Block2";
+        public static final String Block1 = "Block1";
+        public static final String Size2 = "Size2";
+        public static final String Cookie = "Cookie";
+        public static final String Set_Cookie = "Set-Cookie";
     }
 
     /**
@@ -95,7 +96,9 @@ public final class CustomOptionNumberRegistry {
      */
     public static class Defaults {
 
-        /** The default Max-Age. */
+        /**
+         * The default Max-Age.
+         */
         public static final long MAX_AGE = 60L;
     }
 
@@ -109,8 +112,7 @@ public final class CustomOptionNumberRegistry {
     /**
      * Returns the option format based on the option number.
      *
-     * @param optionNumber
-     *            The option number
+     * @param optionNumber The option number
      * @return The option format corresponding to the option number
      */
     public static optionFormats getFormatByNr(int optionNumber) {
@@ -147,8 +149,7 @@ public final class CustomOptionNumberRegistry {
     /**
      * Checks whether an option is critical.
      *
-     * @param optionNumber
-     *            The option number to check
+     * @param optionNumber The option number to check
      * @return {@code true} if the option is critical
      */
     public static boolean isCritical(int optionNumber) {
@@ -158,8 +159,7 @@ public final class CustomOptionNumberRegistry {
     /**
      * Checks whether an option is elective.
      *
-     * @param optionNumber
-     *            The option number to check
+     * @param optionNumber The option number to check
      * @return {@code true} if the option is elective
      */
     public static boolean isElective(int optionNumber) {
@@ -169,8 +169,7 @@ public final class CustomOptionNumberRegistry {
     /**
      * Checks whether an option is unsafe.
      *
-     * @param optionNumber
-     *            The option number to check
+     * @param optionNumber The option number to check
      * @return {@code true} if the option is unsafe
      */
     public static boolean isUnsafe(int optionNumber) {
@@ -181,8 +180,7 @@ public final class CustomOptionNumberRegistry {
     /**
      * Checks whether an option is safe.
      *
-     * @param optionNumber
-     *            The option number to check
+     * @param optionNumber The option number to check
      * @return {@code true} if the option is safe
      */
     public static boolean isSafe(int optionNumber) {
@@ -192,12 +190,11 @@ public final class CustomOptionNumberRegistry {
     /**
      * Checks whether an option is not a cache-key.
      *
-     * @param optionNumber
-     *            The option number to check
+     * @param optionNumber The option number to check
      * @return {@code true} if the option is not a cache-key
      */
     public static boolean isNoCacheKey(int optionNumber) {
-		/*
+        /*
 		 * When an option is not Unsafe, it is not a Cache-Key (NoCacheKey) if
 		 * and only if bits 3-5 are all set to 1; all other bit combinations
 		 * mean that it indeed is a Cache-Key
@@ -208,8 +205,7 @@ public final class CustomOptionNumberRegistry {
     /**
      * Checks whether an option is a cache-key.
      *
-     * @param optionNumber
-     *            The option number to check
+     * @param optionNumber The option number to check
      * @return {@code true} if the option is a cache-key
      */
     public static boolean isCacheKey(int optionNumber) {
@@ -219,8 +215,7 @@ public final class CustomOptionNumberRegistry {
     /**
      * Checks if is single value.
      *
-     * @param optionNumber
-     *            the option number
+     * @param optionNumber the option number
      * @return {@code true} if is single value
      */
     public static boolean isSingleValue(int optionNumber) {
@@ -251,8 +246,7 @@ public final class CustomOptionNumberRegistry {
     /**
      * Checks if is uri option.
      *
-     * @param optionNumber
-     *            the option number
+     * @param optionNumber the option number
      * @return {@code true} if is uri option
      */
     public static boolean isUriOption(int optionNumber) {
@@ -263,8 +257,7 @@ public final class CustomOptionNumberRegistry {
     /**
      * Returns a string representation of the option number.
      *
-     * @param optionNumber
-     *            the option number to describe
+     * @param optionNumber the option number to describe
      * @return a string describing the option number
      */
     public static String toString(int optionNumber) {
@@ -323,27 +316,27 @@ public final class CustomOptionNumberRegistry {
     }
 
     public static int toNumber(String name) {
-        if (Names.If_Match.equals(name))			return IF_MATCH;
-        else if (Names.Uri_Host.equals(name))		return URI_HOST;
-        else if (Names.ETag.equals(name)) 			return ETAG;
+        if (Names.If_Match.equals(name)) return IF_MATCH;
+        else if (Names.Uri_Host.equals(name)) return URI_HOST;
+        else if (Names.ETag.equals(name)) return ETAG;
         else if (Names.If_None_Match.equals(name)) return IF_NONE_MATCH;
-        else if (Names.Uri_Port.equals(name))		return URI_PORT;
-        else if (Names.Location_Path.equals(name))	return LOCATION_PATH;
-        else if (Names.Uri_Path.equals(name))		return URI_PATH;
-        else if (Names.Content_Format.equals(name))return CONTENT_FORMAT;
-        else if (Names.Max_Age.equals(name)) 		return MAX_AGE;
-        else if (Names.Uri_Query.equals(name))		return URI_QUERY;
-        else if (Names.Accept.equals(name))		return ACCEPT;
-        else if (Names.Location_Query.equals(name))return LOCATION_QUERY;
-        else if (Names.Proxy_Uri.equals(name)) 	return PROXY_URI;
-        else if (Names.Proxy_Scheme.equals(name)) 	return PROXY_SCHEME;
-        else if (Names.Observe.equals(name))		return OBSERVE;
-        else if (Names.Block2.equals(name))		return BLOCK2;
-        else if (Names.Block1.equals(name))		return BLOCK1;
-        else if (Names.Size2.equals(name))			return SIZE2;
-        else if (Names.Size1.equals(name))			return SIZE1;
-        else if (Names.Cookie.equals(name))         return COOKIE;
-        else if (Names.Set_Cookie.equals(name))     return SET_COOKIE;
+        else if (Names.Uri_Port.equals(name)) return URI_PORT;
+        else if (Names.Location_Path.equals(name)) return LOCATION_PATH;
+        else if (Names.Uri_Path.equals(name)) return URI_PATH;
+        else if (Names.Content_Format.equals(name)) return CONTENT_FORMAT;
+        else if (Names.Max_Age.equals(name)) return MAX_AGE;
+        else if (Names.Uri_Query.equals(name)) return URI_QUERY;
+        else if (Names.Accept.equals(name)) return ACCEPT;
+        else if (Names.Location_Query.equals(name)) return LOCATION_QUERY;
+        else if (Names.Proxy_Uri.equals(name)) return PROXY_URI;
+        else if (Names.Proxy_Scheme.equals(name)) return PROXY_SCHEME;
+        else if (Names.Observe.equals(name)) return OBSERVE;
+        else if (Names.Block2.equals(name)) return BLOCK2;
+        else if (Names.Block1.equals(name)) return BLOCK1;
+        else if (Names.Size2.equals(name)) return SIZE2;
+        else if (Names.Size1.equals(name)) return SIZE1;
+        else if (Names.Cookie.equals(name)) return COOKIE;
+        else if (Names.Set_Cookie.equals(name)) return SET_COOKIE;
         else return UNKNOWN;
     }
 

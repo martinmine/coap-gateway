@@ -67,6 +67,7 @@ public class CustomMediaTypeRegistry {
 
     // initializer
     private static final HashMap<Integer, String[]> registry = new HashMap<Integer, String[]>();
+
     static {
         add(UNDEFINED, "unknown", "???");
 
@@ -189,6 +190,6 @@ public class CustomMediaTypeRegistry {
     }
 
     private static void add(int mediaType, String string, String extension) {
-        registry.put(mediaType, new String[] { string, extension });
+        registry.put(mediaType, new String[]{string, extension});
     }
 }

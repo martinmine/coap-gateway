@@ -26,8 +26,8 @@ public final class RequestContext {
     /**
      * Instantiates a new coap response worker.
      *
-     * @param httpExchange   the http exchange
-     * @param httpRequest    the http request
+     * @param httpExchange the http exchange
+     * @param httpRequest  the http request
      */
     public RequestContext(HttpAsyncExchange httpExchange, HttpRequest httpRequest) {
         // super(name);
@@ -63,7 +63,7 @@ public final class RequestContext {
     /**
      * Send simple http response.
      *
-     * @param httpCode     the http code
+     * @param httpCode the http code
      */
     public void sendSimpleHttpResponse(int httpCode) {
         // get the empty response from the exchange
