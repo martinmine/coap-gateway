@@ -89,7 +89,7 @@ public class ProxyHttpClientResource extends ForwardingResource {
         try {
             // get the mapping to http for the incoming coap request
             httpRequest = HttpTranslator.getHttpRequest(incomingCoapRequest);
-            LOGGER.info("Outgoing http request: " + httpRequest.getRequestLine());
+            LOGGER.finer("--> --> " + httpRequest.getRequestLine());
         } catch (InvalidFieldException e) {
             LOGGER.warning("Problems during the http/coap translation: " + e.getMessage());
             future.complete(new Response(CoapTranslator.STATUS_FIELD_MALFORMED));
@@ -103,7 +103,7 @@ public class ProxyHttpClientResource extends ForwardingResource {
 
         // accept the request sending a separate response to avoid the timeout
         // in the requesting client
-        LOGGER.info("Acknowledge message sent");
+        LOGGER.finer("Acknowledge message sent");
 
         final CloseableHttpAsyncClient asyncClient = HttpClientPool.getClient();
         asyncClient.start();
@@ -114,7 +114,8 @@ public class ProxyHttpClientResource extends ForwardingResource {
             public void completed(HttpResponse result) {
                 HttpClientPool.putClient(asyncClient);
                 long timestamp = System.nanoTime();
-                LOGGER.info("Incoming http response: " + result.getStatusLine());
+                //LOGGER.info("Incoming http response: " + result.getStatusLine());
+                LOGGER.info("--> <-- " + httpRequest.getRequestLine().getUri() + " HTTP " + result.getStatusLine().getStatusCode());
                 // the entity of the response, if non repeatable, could be
                 // consumed only one time, so do not debug it!
                 // System.out.println(EntityUtils.toString(httpResponse.getEntity()));

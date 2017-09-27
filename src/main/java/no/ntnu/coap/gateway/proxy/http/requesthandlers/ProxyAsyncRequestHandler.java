@@ -56,13 +56,13 @@ public class ProxyAsyncRequestHandler implements HttpAsyncRequestHandler<HttpReq
      */
     @Override
     public void handle(HttpRequest httpRequest, HttpAsyncExchange httpExchange, HttpContext httpContext) throws HttpException, IOException {
-        LOGGER.finer("Incoming http request: " + httpRequest.getRequestLine());
+        LOGGER.info("--> " + httpRequest.getRequestLine().getUri());
         final RequestContext context = new RequestContext(httpExchange, httpRequest);
 
         try {
             // translate the request in a valid coap request
             Request coapRequest = HttpTranslator.getCoapRequest(httpRequest, localResource, proxyingEnabled);
-            LOGGER.info("Received HTTP request and translate to " + coapRequest);
+            //LOGGER.info("Received HTTP request and translate to " + coapRequest);
             LOGGER.finer("Fill exchange with: " + coapRequest + " with hash=" + coapRequest.hashCode());
 
             requestHandler.handleRequest(coapRequest, context);

@@ -14,7 +14,7 @@ import java.util.Queue;
 import java.util.logging.Logger;
 
 public class HttpClientPool {
-    private static final int INIT_SIZE = 2;
+    private static final int INIT_SIZE = 10;
     private static final Queue<CloseableHttpAsyncClient> clients = initClientPool(INIT_SIZE);
 
     private static final int KEEP_ALIVE = 5000;

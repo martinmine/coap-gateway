@@ -10,6 +10,7 @@ import org.apache.http.StatusLine;
 import org.apache.http.impl.EnglishReasonPhraseCatalog;
 import org.apache.http.message.BasicStatusLine;
 import org.apache.http.nio.protocol.HttpAsyncExchange;
+import org.eclipse.californium.core.coap.Request;
 import org.eclipse.californium.core.coap.Response;
 
 import java.util.Locale;
@@ -51,7 +52,7 @@ public final class RequestContext {
             // translate the coap response in an http response
             HttpTranslator.getHttpResponse(httpRequest, coapResponse, httpResponse);
 
-            LOGGER.finer("Outgoing http response: " + httpResponse.getStatusLine());
+            LOGGER.info("<-- " + httpRequest.getRequestLine().getUri() + " HTTP " + httpResponse.getStatusLine().getStatusCode());
         } catch (TranslationException e) {
             LOGGER.warning("Failed to translate coap response to http response: " + e.getMessage());
             sendSimpleHttpResponse(HttpTranslator.STATUS_TRANSLATION_ERROR);
@@ -75,6 +76,7 @@ public final class RequestContext {
         StatusLine statusLine = new BasicStatusLine(HttpVersion.HTTP_1_1, httpCode, EnglishReasonPhraseCatalog.INSTANCE.getReason(httpCode, Locale.ENGLISH));
         httpResponse.setStatusLine(statusLine);
 
+        LOGGER.info("<-- HTTP " + httpCode + " for URL [" + httpRequest.getRequestLine().getUri() + "]");
         // send the error response
         httpExchange.submitResponse();
     }

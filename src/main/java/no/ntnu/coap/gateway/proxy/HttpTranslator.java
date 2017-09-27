@@ -181,7 +181,6 @@ public final class HttpTranslator {
                 // If an HTTP request contains multiple accepts, this method
                 // fails. Therefore, we currently skip accepts at the moment.
                 if (headerName.startsWith("accept")) {
-                    LOGGER.warning("Ignoring accept header");
                     continue;
                 }
 
@@ -211,7 +210,6 @@ public final class HttpTranslator {
                 // ignore the content-type because it will be handled within the
                 // payload
                 if (optionNumber == CustomOptionNumberRegistry.CONTENT_FORMAT) {
-                    LOGGER.info("Content format skipping header " + headerName);
                     continue;
                 }
 
@@ -279,7 +277,6 @@ public final class HttpTranslator {
                             option.setStringValue(headerValue);
                             break;
                     }
-                    LOGGER.info("Header " + headerName + " mapped to " + optionNumber + " with value " + headerValue);
                     // option.setValue(headerValue.getBytes(Charset.forName("ISO-8859-1")));
                     optionList.add(option);
                 }
@@ -774,8 +771,8 @@ public final class HttpTranslator {
 			 */
             String proxyUriString = URLDecoder.decode(
                     coapRequest.getOptions().getProxyUri(), "UTF-8");
+            LOGGER.info("--> " + coapRequest.getOptions().getProxyUri());
             proxyUri = new URI(proxyUriString);
-            LOGGER.info("Received incoming proxy request to " + proxyUriString);
         } catch (UnsupportedEncodingException e) {
             LOGGER.warning("UTF-8 do not support this encoding: " + e);
             throw new TranslationException("UTF-8 do not support this encoding", e);

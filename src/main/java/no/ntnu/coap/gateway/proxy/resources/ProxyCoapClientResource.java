@@ -49,7 +49,7 @@ public class ProxyCoapClientResource extends ForwardingResource {
     public CompletableFuture<Response> forwardRequest(Request request) {
         final CompletableFuture<Response> future = new CompletableFuture<>();
 
-        LOGGER.info("ProxyCoAP2CoAP forwards " + request);
+        //LOGGER.info("ProxyCoAP2CoAP forwards " + request);
 
         // check the invariant: the request must have the proxy-uri set
         if (!request.getOptions().hasProxyUri()) {
@@ -73,12 +73,11 @@ public class ProxyCoapClientResource extends ForwardingResource {
 //			outgoingRequest.enableResponseQueue(true);
 
             // get the token from the manager // TODO: necessary?
-//			outgoingRequest.setToken(TokenManager.getInstance().acquireToken());
+			//outgoingRequest.setToken(TokenManager.getInstance().acquireToken());
 
             // execute the request
             LOGGER.finer("Sending coap request.");
 //			outgoingRequest.execute();
-            LOGGER.info("ProxyCoapClient received CoAP request and sends a copy to CoAP target");
             outgoingRequest.send();
 
             // accept the request sending a separate response to avoid the

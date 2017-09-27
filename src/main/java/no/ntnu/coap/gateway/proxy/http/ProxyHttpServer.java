@@ -77,7 +77,7 @@ public class ProxyHttpServer implements RequestHandler {
     @Override
     public void handleRequest(final Request request, final RequestContext context) {
 
-        LOGGER.info("ProxyEndpoint handles request " + request);
+        //LOGGER.info("ProxyEndpoint handles request " + request);
 
         Exchange exchange = new Exchange(request, Origin.REMOTE) {
 
@@ -116,7 +116,7 @@ public class ProxyHttpServer implements RequestHandler {
             // get the response from the cache
             response = cacheResource.getResponse(request);
 
-            LOGGER.info("Cache returned " + response);
+            LOGGER.finer("Cache returned " + response);
 
             // update statistics
             statsResource.updateStatistics(request, response != null);
@@ -134,7 +134,7 @@ public class ProxyHttpServer implements RequestHandler {
             if (request.getOptions().hasProxyUri()) {
                 try {
                     manageProxyUriRequest(request);
-                    LOGGER.info("after manageProxyUriRequest: " + request);
+                    LOGGER.finer("after manageProxyUriRequest: " + request);
 
                 } catch (URISyntaxException e) {
                     LOGGER.warning(String.format("Proxy-uri malformed: %s", request.getOptions().getProxyUri()));
@@ -178,7 +178,7 @@ public class ProxyHttpServer implements RequestHandler {
             clientPath = PROXY_COAP_CLIENT;
         }
 
-        LOGGER.info("Chose " + clientPath + " as clientPath");
+        LOGGER.finer("Chose " + clientPath + " as clientPath");
 
         // set the path in the request to be forwarded correctly
         request.getOptions().setUriPath(clientPath);
@@ -188,7 +188,7 @@ public class ProxyHttpServer implements RequestHandler {
     protected void responseProduced(Request request, Response response) {
         // check if the proxy-uri is defined
         if (request.getOptions().hasProxyUri()) {
-            LOGGER.info("Cache response");
+            LOGGER.finer("Cache response");
             // insert the response in the cache
             cacheResource.cacheResponse(request, response);
         } else {
