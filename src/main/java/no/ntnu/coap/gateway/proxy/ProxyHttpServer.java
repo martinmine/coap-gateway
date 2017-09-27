@@ -75,14 +75,10 @@ public class ProxyHttpServer {
 	public ProxyHttpServer(int httpPort) throws IOException {
 	
 		this.httpStack = new HttpStack(httpPort);
-		this.httpStack.setRequestHandler(new RequestHandler() {
-			public void handleRequest(Request request) {
-				ProxyHttpServer.this.handleRequest(request);
-			}
-		});
+		this.httpStack.setRequestHandler(ProxyHttpServer.this::handleRequest);
 	}
 
-	public void handleRequest(final Request request) {
+	public void handleRequest(final Request request, final RequestContext context) {
 		
 		LOGGER.info("ProxyEndpoint handles request "+request);
 		
@@ -105,7 +101,7 @@ public class ProxyHttpServer {
 				try {
 					request.setResponse(response);
 					responseProduced(request, response);
-					httpStack.doSendResponse(request, response);
+					context.handleRequestForwarding(response);
 				} catch (Exception e) {
 					LOGGER.log(Level.WARNING, "Exception while responding to Http request", e);
 				}

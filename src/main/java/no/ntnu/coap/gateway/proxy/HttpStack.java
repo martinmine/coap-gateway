@@ -19,33 +19,22 @@ package no.ntnu.coap.gateway.proxy;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.Locale;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Exchanger;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.sun.org.apache.regexp.internal.RE;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.HttpStatus;
-import org.apache.http.HttpVersion;
-import org.apache.http.StatusLine;
 import org.apache.http.client.protocol.RequestAcceptEncoding;
 import org.apache.http.client.protocol.ResponseContentEncoding;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.DefaultConnectionReuseStrategy;
-import org.apache.http.impl.EnglishReasonPhraseCatalog;
 import org.apache.http.impl.nio.DefaultHttpServerIODispatch;
 import org.apache.http.impl.nio.DefaultNHttpServerConnection;
 import org.apache.http.impl.nio.DefaultNHttpServerConnectionFactory;
 import org.apache.http.impl.nio.reactor.DefaultListeningIOReactor;
-import org.apache.http.message.BasicStatusLine;
 import org.apache.http.nio.NHttpConnectionFactory;
 import org.apache.http.nio.protocol.BasicAsyncRequestConsumer;
 import org.apache.http.nio.protocol.BasicAsyncRequestHandler;
@@ -70,10 +59,7 @@ import org.apache.http.protocol.ResponseDate;
 import org.apache.http.protocol.ResponseServer;
 
 import org.eclipse.californium.core.coap.Request;
-import org.eclipse.californium.core.coap.Response;
 import org.eclipse.californium.core.network.config.NetworkConfig;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 
 /**
  * Class encapsulating the logic of a http server. The class create a receiver
@@ -84,13 +70,10 @@ public class HttpStack {
 
     private static final Logger LOGGER = Logger.getLogger(HttpStack.class.getCanonicalName());
 
-    private static final Response Response_NULL = new Response(null); // instead of Response.NULL // TODO
-
     private static final int SOCKET_TIMEOUT = NetworkConfig.getStandard().getInt(
             NetworkConfig.Keys.HTTP_SERVER_SOCKET_TIMEOUT);
     private static final int SOCKET_BUFFER_SIZE = NetworkConfig.getStandard().getInt(
             NetworkConfig.Keys.HTTP_SERVER_SOCKET_BUFFER_SIZE);
-    private static final int GATEWAY_TIMEOUT = SOCKET_TIMEOUT * 3 / 4;
     private static final String SERVER_NAME = "Californium Http Proxy";
 
     /**
@@ -109,10 +92,6 @@ public class HttpStack {
      */
     public static final String LOCAL_RESOURCE_NAME = "local";
 
-    //private final ConcurrentHashMap<Request, Exchanger<Response>> exchangeMap = new ConcurrentHashMap<Request, Exchanger<Response>>();
-
-    // FIXME: GET RID OF THIS
-    private final ConcurrentHashMap<Request, CoapResponseWorker> terribleConnectionsOverview = new ConcurrentHashMap<>();
     private RequestHandler requestHandler;
 
     /**
@@ -124,89 +103,6 @@ public class HttpStack {
      */
     public HttpStack(int httpPort) throws IOException {
         new HttpServer(httpPort);
-    }
-
-    /**
-     * Send simple http response.
-     *
-     * @param httpExchange the http exchange
-     * @param httpCode     the http code
-     */
-    private void sendSimpleHttpResponse(HttpAsyncExchange httpExchange, int httpCode) {
-        // get the empty response from the exchange
-        HttpResponse httpResponse = httpExchange.getResponse();
-
-        // create and set the status line
-        StatusLine statusLine = new BasicStatusLine(HttpVersion.HTTP_1_1, httpCode, EnglishReasonPhraseCatalog.INSTANCE.getReason(httpCode, Locale.ENGLISH));
-        httpResponse.setStatusLine(statusLine);
-
-        // send the error response
-        httpExchange.submitResponse();
-    }
-
-    protected void doSendResponse(Request request, Response response) throws IOException {
-        // the http stack is intended to send back only coap responses
-
-        // retrieve the request linked to the response
-        LOGGER.info("Handling response for request: " + request);
-
-        CoapResponseWorker responder = terribleConnectionsOverview.get(request);
-
-        if (responder != null) {
-            responder.handleRequestForwarding(response);
-            LOGGER.info("Response was forwarded");
-            terribleConnectionsOverview.remove(request);
-        } else {
-            LOGGER.severe("NOT SURE WHAT TO DO IT BROKE WHERE IT SHOULD NOT BREAK!");
-        }
-    }
-
-    /**
-     * The Class CoapResponseWorker. This thread waits a response from the lower
-     * layers. It is the consumer of the producer/consumer pattern.
-     */
-    private final class CoapResponseWorker {
-        private final HttpAsyncExchange httpExchange;
-        private final HttpRequest httpRequest;
-
-        /**
-         * Instantiates a new coap response worker.
-         *
-         * @param httpExchange   the http exchange
-         * @param httpRequest    the http request
-         */
-        public CoapResponseWorker(HttpAsyncExchange httpExchange, HttpRequest httpRequest) {
-            // super(name);
-            this.httpExchange = httpExchange;
-            this.httpRequest = httpRequest;
-        }
-
-        public void handleRequestForwarding(Response coapResponse) {
-            // get the response
-
-            if (coapResponse == null) {
-                LOGGER.warning("No coap response");
-                sendSimpleHttpResponse(httpExchange, HttpTranslator.STATUS_NOT_FOUND);
-                return;
-            }
-
-            // get the sample http response
-            HttpResponse httpResponse = httpExchange.getResponse();
-
-            try {
-                // translate the coap response in an http response
-                HttpTranslator.getHttpResponse(httpRequest, coapResponse, httpResponse);
-
-                LOGGER.finer("Outgoing http response: " + httpResponse.getStatusLine());
-            } catch (TranslationException e) {
-                LOGGER.warning("Failed to translate coap response to http response: " + e.getMessage());
-                sendSimpleHttpResponse(httpExchange, HttpTranslator.STATUS_TRANSLATION_ERROR);
-                return;
-            }
-
-            // send the response
-            httpExchange.submitResponse();
-        }
     }
 
     private class HttpServer {
@@ -335,8 +231,8 @@ public class HttpStack {
              */
             @Override
             public void handle(HttpRequest httpRequest, HttpAsyncExchange httpExchange, HttpContext httpContext) throws HttpException, IOException {
-//				if (Bench_Help.DO_LOG) 
                 LOGGER.finer("Incoming http request: " + httpRequest.getRequestLine());
+                final RequestContext context = new RequestContext(httpExchange, httpRequest);
 
                 try {
                     // translate the request in a valid coap request
@@ -344,20 +240,16 @@ public class HttpStack {
                     LOGGER.info("Received HTTP request and translate to " + coapRequest);
                     LOGGER.finer("Fill exchange with: " + coapRequest + " with hash=" + coapRequest.hashCode());
 
-                    terribleConnectionsOverview.put(coapRequest, new CoapResponseWorker(httpExchange, httpRequest));
-                    doReceiveMessage(coapRequest);
+                    requestHandler.handleRequest(coapRequest, context);
                 } catch (InvalidMethodException e) {
                     LOGGER.warning("Method not implemented" + e.getMessage());
-                    sendSimpleHttpResponse(httpExchange, HttpTranslator.STATUS_WRONG_METHOD);
-                    return;
+                    context.sendSimpleHttpResponse(HttpTranslator.STATUS_WRONG_METHOD);
                 } catch (InvalidFieldException e) {
                     LOGGER.warning("Request malformed" + e.getMessage());
-                    sendSimpleHttpResponse(httpExchange, HttpTranslator.STATUS_URI_MALFORMED);
-                    return;
+                    context.sendSimpleHttpResponse(HttpTranslator.STATUS_URI_MALFORMED);
                 } catch (TranslationException e) {
                     LOGGER.warning("Failed to translate the http request in a valid coap request: " + e.getMessage());
-                    sendSimpleHttpResponse(httpExchange, HttpTranslator.STATUS_TRANSLATION_ERROR);
-                    return;
+                    context.sendSimpleHttpResponse(HttpTranslator.STATUS_TRANSLATION_ERROR);
                 }
             }
 
@@ -377,16 +269,7 @@ public class HttpStack {
 
     }
 
-    public void doReceiveMessage(Request request) {
-        requestHandler.handleRequest(request);
-    }
-
-    public RequestHandler getRequestHandler() {
-        return requestHandler;
-    }
-
     public void setRequestHandler(RequestHandler requestHandler) {
         this.requestHandler = requestHandler;
     }
-
 }
