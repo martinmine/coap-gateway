@@ -88,13 +88,18 @@ public class HttpStack {
         this.httpPort = httpPort;
 
         // HTTP parameters for the server
-        HttpParams params = new SyncBasicHttpParams();
-        params.setIntParameter(CoreConnectionPNames.SO_TIMEOUT, SOCKET_TIMEOUT).setIntParameter(CoreConnectionPNames.SOCKET_BUFFER_SIZE, SOCKET_BUFFER_SIZE).setBooleanParameter(CoreConnectionPNames.TCP_NODELAY, true).setParameter(CoreProtocolPNames.ORIGIN_SERVER, SERVER_NAME);
+        HttpParams params = new SyncBasicHttpParams()
+                .setIntParameter(CoreConnectionPNames.SO_TIMEOUT, SOCKET_TIMEOUT)
+                .setIntParameter(CoreConnectionPNames.SOCKET_BUFFER_SIZE, SOCKET_BUFFER_SIZE)
+                .setBooleanParameter(CoreConnectionPNames.TCP_NODELAY, true)
+                .setParameter(CoreProtocolPNames.ORIGIN_SERVER, SERVER_NAME);
 
         // Create HTTP protocol processing chain
         // Use standard server-side protocol interceptors
         HttpRequestInterceptor[] requestInterceptors = new HttpRequestInterceptor[]{new RequestAcceptEncoding()};
-        HttpResponseInterceptor[] responseInterceptors = new HttpResponseInterceptor[]{new ResponseContentEncoding(), new ResponseDate(), new ResponseServer(), new ResponseContent(), new ResponseConnControl()};
+        HttpResponseInterceptor[] responseInterceptors = new HttpResponseInterceptor[]{
+                new ResponseContentEncoding(), new ResponseDate(), new ResponseServer(),
+                new ResponseContent(), new ResponseConnControl()};
         HttpProcessor httpProcessor = new ImmutableHttpProcessor(requestInterceptors, responseInterceptors);
 
         // Create request handler registry
