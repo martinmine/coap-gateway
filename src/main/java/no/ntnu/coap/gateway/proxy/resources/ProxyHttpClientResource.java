@@ -58,8 +58,6 @@ public class ProxyHttpClientResource extends ForwardingResource {
 		getAttributes().setTitle("Forward the requests to a HTTP client.");
 	}
 
-	private static final AbstractHttpClient client = HttpClientPool.getClient();
-
 	@Override
 	public Response forwardRequest(Request request) {
 		final Request incomingCoapRequest = request;
@@ -129,7 +127,7 @@ public class ProxyHttpClientResource extends ForwardingResource {
 		// in the requesting client
 		LOGGER.info("Acknowledge message sent");
 
-
+		final AbstractHttpClient client = HttpClientPool.getClient();
 		try {
 			// execute the request
 			return client.execute(httpHost, httpRequest, httpResponseHandler, null);

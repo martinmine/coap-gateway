@@ -215,8 +215,6 @@ public final class HttpTranslator {
 	
 				// ignore the header if not found in the properties file
 				if (optionCodeString == null || optionCodeString.isEmpty()) {
-					LOGGER.warning("No header found for header name [" + headerName + "] -> [" + KEY_HTTP_HEADER + headerName +"] entr: " + HTTP_TRANSLATION_PROPERTIES.size());
-
 					if (headerName.equals("set-cookie")) {
 						LOGGER.warning("is set-cookie");
 
@@ -765,11 +763,8 @@ public final class HttpTranslator {
 						stringOptionValue = "max-age=" + stringOptionValue;
 					}
 
-					LOGGER.info("Option " + optionNumber + " maps to header " + headerName + " with value " + stringOptionValue);
 					Header header = new BasicHeader(headerName, stringOptionValue);
 					headers.add(header);
-				} else {
-					LOGGER.warning("No header for option number " + optionNumber);
 				}
 			}
 		}

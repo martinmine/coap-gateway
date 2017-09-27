@@ -42,18 +42,18 @@ public class HttpClientPool {
     }
 
     public static AbstractHttpClient getClient() {
-     /*   synchronized (clients) {
+        synchronized (clients) {
             if (clients.size() > 0) {
                 return clients.remove();
             }
         }
 
         LOGGER.warning("Out of clients, creating more");
-        */
+
         return createClient();
     }
 
-    private static AbstractHttpClient createClient() {
+    public static AbstractHttpClient createClient() {
         final AbstractHttpClient client = new DefaultHttpClient();
 
         // request interceptors
