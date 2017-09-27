@@ -18,6 +18,7 @@
 package no.ntnu.coap.gateway.proxy.resources;
 
 import no.ntnu.coap.gateway.proxy.*;
+import no.ntnu.coap.gateway.proxy.http.HttpClientPool;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.client.ResponseHandler;

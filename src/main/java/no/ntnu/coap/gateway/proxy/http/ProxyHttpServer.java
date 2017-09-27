@@ -15,8 +15,9 @@
  *    Martin Lanter - architect and re-implementation
  *    Francesco Corazza - HTTP cross-proxy
  ******************************************************************************/
-package no.ntnu.coap.gateway.proxy;
+package no.ntnu.coap.gateway.proxy.http;
 
+import no.ntnu.coap.gateway.proxy.ProxyCoapResolver;
 import no.ntnu.coap.gateway.proxy.resources.ProxyCacheResource;
 import no.ntnu.coap.gateway.proxy.resources.StatsResource;
 import org.eclipse.californium.core.CoapServer;
@@ -70,9 +71,7 @@ public class ProxyHttpServer implements RequestHandler {
      * @throws IOException the socket exception
      */
     public ProxyHttpServer(int httpPort) throws IOException {
-
-        this.httpStack = new HttpStack(httpPort);
-        this.httpStack.setRequestHandler(this);
+        this.httpStack = new HttpStack(httpPort, this);
     }
 
     @Override
@@ -128,7 +127,6 @@ public class ProxyHttpServer implements RequestHandler {
             // link the retrieved response with the request to set the
             // parameters request-specific (i.e., token, id, etc)
             exchange.sendResponse(response);
-            return;
         } else {
 
             // edit the request to be correctly forwarded if the proxy-uri is
@@ -206,4 +204,7 @@ public class ProxyHttpServer implements RequestHandler {
         this.proxyCoapResolver = proxyCoapResolver;
     }
 
+    public void acceptConnections(final boolean isDeamon) {
+        this.httpStack.start(isDeamon);
+    }
 }

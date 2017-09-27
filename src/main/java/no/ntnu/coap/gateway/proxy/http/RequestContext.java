@@ -1,6 +1,8 @@
-package no.ntnu.coap.gateway.proxy;
+package no.ntnu.coap.gateway.proxy.http;
 
 
+import no.ntnu.coap.gateway.proxy.HttpTranslator;
+import no.ntnu.coap.gateway.proxy.TranslationException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;

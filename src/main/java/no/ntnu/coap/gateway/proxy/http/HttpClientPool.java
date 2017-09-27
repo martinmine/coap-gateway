@@ -1,4 +1,4 @@
-package no.ntnu.coap.gateway.proxy;
+package no.ntnu.coap.gateway.proxy.http;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.protocol.RequestAcceptEncoding;

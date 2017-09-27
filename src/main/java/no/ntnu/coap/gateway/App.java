@@ -4,7 +4,7 @@ import no.ntnu.coap.gateway.proxy.resources.ProxyCoapClientResource;
 import org.apache.commons.cli.*;
 import org.eclipse.californium.core.CoapServer;
 import no.ntnu.coap.gateway.proxy.DirectProxyCoapResolver;
-import no.ntnu.coap.gateway.proxy.ProxyHttpServer;
+import no.ntnu.coap.gateway.proxy.http.ProxyHttpServer;
 import no.ntnu.coap.gateway.proxy.resources.ForwardingResource;
 import no.ntnu.coap.gateway.proxy.resources.ProxyHttpClientResource;
 
@@ -37,6 +37,7 @@ public class App {
 
             final ProxyHttpServer httpServer = new ProxyHttpServer(httpPort);
             httpServer.setProxyCoapResolver(new DirectProxyCoapResolver(coap2coap));
+            httpServer.acceptConnections(false);
         } else if (mode.equals("coap")) {
             System.out.println("Starting CoAP gateway on port " + coapPort);
 

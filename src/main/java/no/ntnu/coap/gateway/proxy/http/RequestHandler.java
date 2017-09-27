@@ -15,8 +15,9 @@
  *    Martin Lanter - architect and re-implementation
  *    Francesco Corazza - HTTP cross-proxy
  ******************************************************************************/
-package no.ntnu.coap.gateway.proxy;
+package no.ntnu.coap.gateway.proxy.http;
 
+import no.ntnu.coap.gateway.proxy.http.RequestContext;
 import org.eclipse.californium.core.coap.Request;
 
 
