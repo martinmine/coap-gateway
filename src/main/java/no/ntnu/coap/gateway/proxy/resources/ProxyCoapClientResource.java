@@ -18,11 +18,13 @@
 package no.ntnu.coap.gateway.proxy.resources;
 
 import no.ntnu.coap.gateway.proxy.CoapTranslator;
+import no.ntnu.coap.gateway.proxy.EndPointManagerPool;
 import no.ntnu.coap.gateway.proxy.TranslationException;
 import org.eclipse.californium.core.coap.CoAP.ResponseCode;
 import org.eclipse.californium.core.coap.MessageObserver;
 import org.eclipse.californium.core.coap.Request;
 import org.eclipse.californium.core.coap.Response;
+import org.eclipse.californium.core.network.EndpointManager;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Logger;
@@ -62,6 +64,8 @@ public class ProxyCoapClientResource extends ForwardingResource {
         // FIXME: HACK // TODO: why? still necessary in new Cf?
         request.getOptions().clearUriPath();
 
+        final EndpointManager endpointManager = EndPointManagerPool.getManager();
+
         // create a new request to forward to the requested coap server
         Request outgoingRequest = null;
         try {
@@ -75,10 +79,70 @@ public class ProxyCoapClientResource extends ForwardingResource {
             // get the token from the manager // TODO: necessary?
 			//outgoingRequest.setToken(TokenManager.getInstance().acquireToken());
 
+
+            // receive the response // TODO: don't wait for ever
+            outgoingRequest.addMessageObserver(new MessageObserver() {
+
+                @Override
+                public void onResponse(Response response) {
+                    Response outgoingResponse = CoapTranslator.getResponse(response);
+                    future.complete(outgoingResponse);
+                    EndPointManagerPool.putClient(endpointManager);
+                }
+
+                @Override
+                public void onAcknowledgement() {
+                }
+
+                @Override
+                public void onReject() {
+                    LOGGER.warning("Request rejected.");
+                    future.complete(new Response(CoapTranslator.STATUS_TIMEOUT));
+                    EndPointManagerPool.putClient(endpointManager);
+                }
+
+                @Override
+                public void onTimeout() {
+                    LOGGER.warning("Request timed out.");
+                    future.complete(new Response(CoapTranslator.STATUS_TIMEOUT));
+                    EndPointManagerPool.putClient(endpointManager);
+                }
+
+                @Override
+                public void onCancel() {
+                    LOGGER.warning("Request canceled.");
+                    EndPointManagerPool.putClient(endpointManager);
+                    future.complete(new Response(CoapTranslator.STATUS_TIMEOUT));
+                }
+
+                @Override
+                public void onRetransmission() {
+                    LOGGER.info("Trying sending again");
+                }
+/*
+            @Override
+            public void onSent() {
+            }
+
+            @Override
+            public void onReadyToSend() {
+            }
+
+            @Override
+            public void onSendError(Throwable error) {
+                LOGGER.severe("Error while sending: " + error.toString());
+            }
+            */
+            });
+
             // execute the request
             LOGGER.finer("Sending coap request.");
-//			outgoingRequest.execute();
-            outgoingRequest.send();
+
+            if (outgoingRequest.getDestination() == null)
+                throw new NullPointerException("Destination is null");
+            if (outgoingRequest.getDestinationPort() == 0)
+                throw new NullPointerException("Destination port is 0");
+            endpointManager.getDefaultEndpoint().sendRequest(outgoingRequest);
 
             // accept the request sending a separate response to avoid the
             // timeout in the requesting client
@@ -89,44 +153,11 @@ public class ProxyCoapClientResource extends ForwardingResource {
             return future;
         } catch (Exception e) {
             LOGGER.warning("Failed to execute request: " + e.getMessage());
+            e.printStackTrace();
             future.complete(new Response(ResponseCode.INTERNAL_SERVER_ERROR));
             return future;
         }
 
-        // receive the response // TODO: don't wait for ever
-        outgoingRequest.addMessageObserver(new MessageObserver() {
-            @Override
-            public void onRetransmission() {
-            }
-
-            @Override
-            public void onResponse(Response response) {
-                Response outgoingResponse = CoapTranslator.getResponse(response);
-                future.complete(outgoingResponse);
-            }
-
-            @Override
-            public void onAcknowledgement() {
-            }
-
-            @Override
-            public void onReject() {
-                LOGGER.warning("Request rejected.");
-                future.complete(new Response(CoapTranslator.STATUS_TIMEOUT));
-            }
-
-            @Override
-            public void onTimeout() {
-                LOGGER.warning("Request timed out.");
-                future.complete(new Response(CoapTranslator.STATUS_TIMEOUT));
-            }
-
-            @Override
-            public void onCancel() {
-                LOGGER.warning("Request canceled.");
-                future.complete(new Response(CoapTranslator.STATUS_TIMEOUT));
-            }
-        });
 
         return future;
     }

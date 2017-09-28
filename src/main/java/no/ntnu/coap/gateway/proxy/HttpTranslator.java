@@ -771,7 +771,6 @@ public final class HttpTranslator {
 			 */
             String proxyUriString = URLDecoder.decode(
                     coapRequest.getOptions().getProxyUri(), "UTF-8");
-            LOGGER.info("--> " + coapRequest.getOptions().getProxyUri());
             proxyUri = new URI(proxyUriString);
         } catch (UnsupportedEncodingException e) {
             LOGGER.warning("UTF-8 do not support this encoding: " + e);
