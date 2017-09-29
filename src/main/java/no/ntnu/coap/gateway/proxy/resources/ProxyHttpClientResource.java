@@ -24,6 +24,7 @@ import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.concurrent.FutureCallback;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
+import org.apache.http.protocol.BasicHttpContext;
 import org.eclipse.californium.core.coap.CoAP.ResponseCode;
 import org.eclipse.californium.core.coap.Request;
 import org.eclipse.californium.core.coap.Response;
@@ -49,6 +50,8 @@ public class ProxyHttpClientResource extends ForwardingResource {
         super(name, true);
         getAttributes().setTitle("Forward the requests to a HTTP client.");
     }
+
+    private static final CloseableHttpAsyncClient asyncClient = HttpClientPool.createClient();
 
     @Override
     public CompletableFuture<Response> forwardRequest(Request request) {
@@ -105,14 +108,13 @@ public class ProxyHttpClientResource extends ForwardingResource {
         // in the requesting client
         LOGGER.finer("Acknowledge message sent");
 
-        final CloseableHttpAsyncClient asyncClient = HttpClientPool.getClient();
-        asyncClient.start();
+
+
         // execute the request
 
-        asyncClient.execute(httpHost, httpRequest, new FutureCallback<HttpResponse>() {
+        asyncClient.execute(httpHost, httpRequest, new BasicHttpContext(), new FutureCallback<HttpResponse>() {
             @Override
             public void completed(HttpResponse result) {
-                HttpClientPool.putClient(asyncClient);
                 long timestamp = System.nanoTime();
                 //LOGGER.info("Incoming http response: " + result.getStatusLine());
                 LOGGER.info("--> <-- " + httpRequest.getRequestLine().getUri() + " HTTP " + result.getStatusLine().getStatusCode());
