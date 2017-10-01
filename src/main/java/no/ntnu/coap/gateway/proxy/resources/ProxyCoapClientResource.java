@@ -65,6 +65,7 @@ public class ProxyCoapClientResource extends ForwardingResource {
         request.getOptions().clearUriPath();
 
         final EndpointManager endpointManager = EndPointManagerPool.getManager();
+        future.thenAccept(response -> EndPointManagerPool.putClient(endpointManager));
 
         // create a new request to forward to the requested coap server
         Request outgoingRequest = null;
@@ -87,7 +88,6 @@ public class ProxyCoapClientResource extends ForwardingResource {
                 public void onResponse(Response response) {
                     Response outgoingResponse = CoapTranslator.getResponse(response);
                     future.complete(outgoingResponse);
-                    EndPointManagerPool.putClient(endpointManager);
                 }
 
                 @Override
@@ -98,20 +98,17 @@ public class ProxyCoapClientResource extends ForwardingResource {
                 public void onReject() {
                     LOGGER.warning("Request rejected.");
                     future.complete(new Response(CoapTranslator.STATUS_TIMEOUT));
-                    EndPointManagerPool.putClient(endpointManager);
                 }
 
                 @Override
                 public void onTimeout() {
                     LOGGER.warning("Request timed out.");
                     future.complete(new Response(CoapTranslator.STATUS_TIMEOUT));
-                    EndPointManagerPool.putClient(endpointManager);
                 }
 
                 @Override
                 public void onCancel() {
                     LOGGER.warning("Request canceled.");
-                    EndPointManagerPool.putClient(endpointManager);
                     future.complete(new Response(CoapTranslator.STATUS_TIMEOUT));
                 }
 
