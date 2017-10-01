@@ -1,6 +1,5 @@
 .gradle/
 .idea/
 out/
-Californium.properties
 ProxyMapping.properties
 build/
